@@ -1,0 +1,7 @@
+scipy
+numpy
+opencv-python
+mtcnn
+keras
+pickle
+sklearn
