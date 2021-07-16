@@ -10,31 +10,12 @@ from re import search
 
 # some declarations
 DATABASE_PATH = "db.py"
-RECORD_FACE_PATH = "library/record_face.py"
-RECOGNIZE_FACE_PATH = "library/recognition.py"
-IMPROVE_FACE_PATH = "library/improve_recognition.py"
 
 # functions to call the libraries
 
 
 def call_database():
     call(["python", DATABASE_PATH])
-
-
-def call_record_face():
-    global RECORD_FACE_PATH
-    call(["python", RECORD_FACE_PATH])
-
-
-def call_recognize_face():
-    global RECOGNIZE_FACE_PATH
-    call(["python", RECOGNIZE_FACE_PATH])
-
-
-def call_improve_face():
-    global RECOGNIZE_FACE_PATH
-    call(["python", IMPROVE_FACE_PATH])
-
 
 # preparing the database (sqlite) for adding the names and etc
 

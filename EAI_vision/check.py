@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Aug 16 22:20:37 2018
-based on the work was done by James Wu
-"""
-
-import dlib
 import cv2
 import numpy as np
 
