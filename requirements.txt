@@ -2,3 +2,16 @@ pygame==2.0.1
 ibm-watson==5.2.1
 opencv-python==4.5.2.54
 dlib==19.22.0
+torch==1.9.0
+numpy==1.21.0
+gym==0.18.3
+tqdm==4.61.2
+matplotlib==3.4.2
+gym-super-mario-bros==7.3.2
+mtcnn==0.1.1
+keras==2.4.3
+scikit-learn==0.24.2
+scipy==1.7.0
+tensorflow==2.5.0
+SpeechRecognition==3.8.1
+PyAudio==0.2.11
