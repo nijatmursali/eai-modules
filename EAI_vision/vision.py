@@ -5,18 +5,18 @@ import os
 
 
 class Vision:
-    def __init__(self, database_path, images_path, cap, checker, detector, predictor, encoder, detector_login,
-                 encode_dict, encoding_path):
+    def __init__(self, credentials, database_path, images_path, cap, checker, detector, predictor, encoder, detector_login, encoding_path):
         self.database_path = database_path  # database of images
+        self.credentials = credentials
         self.images = images_path
         self.detector = detector
         self.predictor = predictor
         self.cap = cap
-        self.encoding_path = encoding_path
         self.checker = checker
         self.encoder = encoder
         self.detector_login = detector_login
-        self.encode_dict = encode_dict
+        self.encoding_path = encoding_path
+        self.encode_dict = self.credentials.load_encodings(encoding_path)
 
     def save_image(self, username, img):
         blank = np.zeros(shape=[480, 640, 3], dtype=np.uint8)
@@ -47,8 +47,11 @@ class Vision:
         glassoff_warning = f'Press Q when you are ready!'
         color = int(not glasses) * green + int(glasses) * red
 
+
+
         texton = int(not glasses) * glassoff + int(glasses) * glasson
         text = int(not glasses) * glassoff_warning + int(glasses) * glasson_warning
+        # cv2.rectangle(image, pt1, pt2, color, 2)
         cv2.putText(image, texton, (x - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7,
                     color, 2, cv2.LINE_AA)
         rectan = cv2.rectangle(image, (0, 400), (640, 470), color, -1)
@@ -92,8 +95,8 @@ class Vision:
                 encode = np.sum(encodes, axis=0)
                 encode = l2_normalizer.transform(np.expand_dims(encode, axis=0))[0]
                 self.encode_dict[person_name] = encode
-        with open(self.encoding_path, 'bw') as file:
-            pickle.dump(self.encode_dict, file)
+
+        self.credentials.save_encodings(self.encoding_path, self.encode_dict)
 
     def create_user_path(self, userid):
         data_path = os.path.join(self.images, userid)
@@ -106,10 +109,10 @@ class Vision:
         while self.cap.isOpened():
             # Read video frame
             _, img = self.cap.read()
-            image = cv2.flip(img, 1)
+            img = cv2.flip(img, 1)
             # cv2.imshow(image)
             # Convert to grayscale
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
             # face detection
             rects = self.detector(gray, 1)
