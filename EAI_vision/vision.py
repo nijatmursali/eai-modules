@@ -4,14 +4,15 @@ from utils import *
 import os
 
 
-
 class Vision:
-    def __init__(self, database_path, cap, checker, detector, predictor, encoder, detector_login, encode_dict):
+    def __init__(self, database_path, images_path, cap, checker, detector, predictor, encoder, detector_login,
+                 encode_dict, encoding_path):
         self.database_path = database_path  # database of images
-
+        self.images = images_path
         self.detector = detector
         self.predictor = predictor
         self.cap = cap
+        self.encoding_path = encoding_path
         self.checker = checker
         self.encoder = encoder
         self.detector_login = detector_login
@@ -31,7 +32,8 @@ class Vision:
         cv2.destroyAllWindows()
 
         file_name = username + '.jpg'
-        cv2.imwrite(os.path.join(self.database_path, file_name), img)
+        image_path = self.create_user_path(username)
+        cv2.imwrite(os.path.join(image_path, file_name), img)
 
     def handle_cv(self, image, username, x, y, glasses):
         taken = False
@@ -44,6 +46,7 @@ class Vision:
         glasson_warning = f'Please remove glasses!'
         glassoff_warning = f'Press Q when you are ready!'
         color = int(not glasses) * green + int(glasses) * red
+
         texton = int(not glasses) * glassoff + int(glasses) * glasson
         text = int(not glasses) * glassoff_warning + int(glasses) * glasson_warning
         cv2.putText(image, texton, (x - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7,
@@ -59,15 +62,44 @@ class Vision:
 
         if not glasses and k == ord('q'):
             if k == ord('q'):
-                print('q basildi')
-                _, img = cap.read()
+                _, img = self.cap.read()
                 img = cv2.flip(img, 1)
                 cv2.imshow('Result', img)
                 cv2.waitKey(3000)
 
-                cap.release()
+                self.cap.release()
                 cv2.destroyAllWindows()
                 self.save_image(username, img)
+
+    def prepare_data(self, required_size):
+        for person_name in os.listdir(self.images):
+            person_dir = os.path.join(self.images, person_name)
+            encodes = []
+            for img_name in os.listdir(person_dir):
+                img_path = os.path.join(person_dir, img_name)
+                img = cv2.imread(img_path)
+                img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                results = self.detector_login.detect_faces(img_rgb)
+                if results:
+                    res = max(results, key=lambda b: b['box'][2] * b['box'][3])
+                    face, _, _ = get_face(img_rgb, res['box'])
+
+                    face = normalize(face)
+                    face = cv2.resize(face, required_size)
+                    encode = self.encoder.predict(np.expand_dims(face, axis=0))[0]
+                    encodes.append(encode)
+            if encodes:
+                encode = np.sum(encodes, axis=0)
+                encode = l2_normalizer.transform(np.expand_dims(encode, axis=0))[0]
+                self.encode_dict[person_name] = encode
+        with open(self.encoding_path, 'bw') as file:
+            pickle.dump(self.encode_dict, file)
+
+    def create_user_path(self, userid):
+        data_path = os.path.join(self.images, userid)
+        if not os.path.exists(data_path):
+            os.makedirs(data_path)
+        return data_path
 
     def register(self, username):
 
@@ -75,8 +107,9 @@ class Vision:
             # Read video frame
             _, img = self.cap.read()
             image = cv2.flip(img, 1)
+            # cv2.imshow(image)
             # Convert to grayscale
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
             # face detection
             rects = self.detector(gray, 1)
@@ -110,7 +143,7 @@ class Vision:
                 self.handle_cv(img, username, x_face, y_face, self.checker.is_glasses_on(aligned_face))
 
                 self.capture_image(self.checker.is_glasses_on(aligned_face), username)
-
+                self.prepare_data((160, 160))
                 cv2.imshow("aligned_face #{}".format(i + 1), aligned_face)
 
             # show result
@@ -172,12 +205,13 @@ class Vision:
                 if res['confidence'] < confidence_t:
                     continue
                 face, pt_1, pt_2 = get_face(img_rgb, res['box'])
+
                 encode = get_encode(self.encoder, face, required_size)
                 encode = l2_normalizer.transform(encode.reshape(1, -1))[0]
 
                 name = 'unknown'
                 distance = float("inf")
-                for db_name, db_encode in encoding_dict.items():
+                for db_name, db_encode in self.encode_dict.items():
                     dist = cosine(db_encode, encode)
                     if dist < recognition_t and dist < distance:
                         name = db_name
@@ -186,14 +220,9 @@ class Vision:
 
                 condition = (name.lower() != username.lower())
                 condition2 = (name == 'unknown')
-                print(name)
-                print(username)
-                print(database_name )
-                print(condition)
                 self.check_name_gen_text(name, img, condition, condition2, pt_1, pt_2, distance)
             cv2.imshow('camera', img)
             # print(name)
 
             if cv2.waitKey(1) & 0xFF == 27:
                 break
-
