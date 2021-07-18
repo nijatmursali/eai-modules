@@ -1,8 +1,7 @@
 import numpy as np
 import torch
-import random
 import torch.nn as nn
-from models import Actor, Critic, Critic_after
+from models import Actor, Critic
 from torch.optim import Adam
 
 

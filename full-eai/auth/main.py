@@ -5,7 +5,6 @@ from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 import pygame
 import os 
 import subprocess
-import time
 
 api = "Pk3HdsDu0xhp7OKVG_5xl02rvHOc4vWEDuFRPjZB6m3p"
 url = "https://api.eu-gb.text-to-speech.watson.cloud.ibm.com/instances/51e11911-183c-4c68-8bc0-a233c527f414"
@@ -52,7 +51,6 @@ def nameonClick(event):
     nameEntry.configure(state=tk.NORMAL)
     nameEntry.delete(0, tk.END)
     nameEntry.unbind('<Button-1>', nameonClickId)
-
 nameonClickId = nameEntry.bind('<Button-1>', nameonClick)
 
 passwordLabel = tk.Label(text="Password")
@@ -91,10 +89,10 @@ def submit():
             pygame.mixer.music.play()
             for row in results:
                 print(row)
-            time.sleep(7)
-            subprocess.call(['python', './main.py'])
+            #time.sleep(7)
+            subprocess.call(['python', '../main.py'])
             window.destroy()
-            subprocess.call(['python', './main.py'])
+            #subprocess.call(['python', './main.py'])
     except Exception as e:
         print(e)
     

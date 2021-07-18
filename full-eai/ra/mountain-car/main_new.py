@@ -5,7 +5,6 @@ import numpy as np
 from agent_new import Ornstein_Uhlenbeck, Agent
 import gym
 from numpy import save
-from tqdm import tqdm
 
 environment = gym.make('MountainCarContinuous-v0')
 

@@ -3,11 +3,11 @@ import torch
 
 from library.Environment import CreateEnv
 from library.Model import ActorCriticNet
-
+import os 
 world = 1
 stage = 1
-
-model_path = './Models/SuperMarioBros_PPO_LSTM_1-1.model'
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+model_path =  os.path.join(BASE_DIR, 'mario/Models/SuperMarioBros_PPO_LSTM_1-1.model') 
 #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 device = torch.device('cpu')
 

@@ -15,18 +15,15 @@ print(BASE_DIR)
 # functions to call the libraries
 
 def call_mario():
-    call(['python', os.path.join(BASE_DIR, 'ra/mario/Test.py')])
+    call(['python', os.path.join(BASE_DIR, 'full-eai/ra/mario/Test.py')])
 
 def call_mountain():
-    call(['python', os.path.join(BASE_DIR, 'ra/mountain-car/main.py')])
+    call(['python', os.path.join(BASE_DIR, 'full-eai/ra/mountain-car/main.py')])
 
 def call_login():
-    call(['python', os.path.join(BASE_DIR, 'cnn/login.py')])
-    pass
-
+    call(['python', os.path.join(BASE_DIR, 'full-eai/cnn/login.py')])
 def call_register():
-    call(['python', os.path.join(BASE_DIR, 'cnn/register.py')])
-    pass
+    call(['python', os.path.join(BASE_DIR, 'full-eai/cnn/register.py')])
 
 # preparing the database (sqlite) for adding the names and etc
 
@@ -47,9 +44,9 @@ tts.set_service_url(url)
 #                          voice='en-US_AllisonV3Voice').get_result()
 #     audio_file.write(res.content)
 pygame.mixer.init()
-pygame.mixer.music.load('./sounds/speech.mp3')
+pygame.mixer.music.load(os.path.join(BASE_DIR, 'full-eai/sounds/speech.mp3'))
 pygame.mixer.music.play()
-pygame.mixer.music.queue('./sounds/beep.mp3')
+pygame.mixer.music.queue(os.path.join(BASE_DIR, 'full-eai/sounds/beep.mp3'))
 mic = sr.Microphone()
 
 
@@ -69,13 +66,15 @@ def listen():
         pygame.mixer.init()
         pygame.mixer.music.load('sounds/speech-login.mp3')
         pygame.mixer.music.play()
-        loginWindow()
+        call_login()
+        #loginWindow()
 
     elif (wantSignup == True):
         pygame.mixer.init()
         pygame.mixer.music.load('sounds/speech-signup.mp3')
         pygame.mixer.music.play()
-        registerWindow()
+        call_register()
+        #registerWindow()
 
 
 def stop():
@@ -108,7 +107,7 @@ def registerWindow():
     pygame.mixer.music.play()
 
 
-mic_image = tk.PhotoImage(file=r"./images/mic.png")
+mic_image = tk.PhotoImage(file=os.path.join(BASE_DIR, 'full-eai/images/mic.png'))
 mic_image = mic_image.subsample(10, 10)
 
 
@@ -174,9 +173,9 @@ def homeWindow():
 
 a = tk.Button(text="LOGIN", width=5, height=2, command=loginWindow)
 b = tk.Button(text="REGISTER", width=5, height=2, command=registerWindow)
-d = tk.Button(text="HOME", width=5, height=2, command=homeWindow)
+d = tk.Button(text="HOME", width=5, height=2, command=call_mario)
 c = tk.Button(text="STOP ASSISTANT", command=stop)
-photo = tk.PhotoImage(file=r"./images/mic.png")
+photo = tk.PhotoImage(file=os.path.join(BASE_DIR, 'full-eai/images/mic.png')) 
 photo = photo.subsample(10, 10)
 tk.Button(window, text='Listen', image=photo,
           command=listen).pack(side=tk.BOTTOM)

@@ -7,7 +7,6 @@ from models import Actor, Critic
 from agent import Ornstein_Uhlenbeck, Agent
 import gym
 from numpy import save
-from tqdm import tqdm
 
 environment = gym.make('MountainCarContinuous-v0')
 num_states = environment.observation_space.shape[0]

@@ -1,3 +1,6 @@
+import os
+import pickle
+
 class Credentials:
     def __init__(self, database_path):
         self.path = database_path
@@ -40,8 +43,6 @@ class Credentials:
 
     def get_Username(self):
         user_id = input(f'Please enter your user_id: ').lower()
-        result = 0
-        counter = 3
         while True:
             if not user_id:
                 print(f'Input is not in required format! Please try again!')
@@ -51,15 +52,32 @@ class Credentials:
                 if user_id not in self.database:
                     print('This user_id was not registered, please try again!')
                     user_id = input(f'Please enter your user_id: ').lower()
-                    if counter == 0:
-                        ans = input('Dear guest! Apparently, you are not registered. Do you want to register?')
-                        self.check_reg(ans)
-                    counter = counter -1
-
-
                 else:
                     return user_id
 
+    def check_encodings(self, encoding_path):
+        if not os.path.exists(encoding_path):
+            return False
+        else:
+            return True
+
+    def save_encodings(self, encoding_path, encoding_dict):
+        file = open(encoding_path, 'wb')
+        pickle.dump(encoding_dict, file)
+        file.close()
+        print('Data has been saved to database ...')
+
+    def load_encodings(self, encoding_path):
+        encoding_dict = dict()
+        if not self.check_encodings(encoding_path):
+            self.save_encodings(encoding_path, encoding_dict)
+            print('Database has been created once! ')
+
+        else:
+            file = open(encoding_path, 'rb')
+            encoding_dict = pickle.load(file)
+            file.close()
+        return encoding_dict
 
 
 # database_path = "Database/usernames.txt"
