@@ -1,23 +1,23 @@
-from nes_py.wrappers import JoypadSpace
-import gym_super_mario_bros
-from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, COMPLEX_MOVEMENT
-from gym import Wrapper
-import numpy as np
-import cv2
+from nes_py.wrappers import JoypadSpace #we import it for discrete action space
+import gym_super_mario_bros #used to have mario environment
+from gym_super_mario_bros.actions import SIMPLE_MOVEMENT #we have 1 type of action
+from gym import Wrapper #base class for all wrappers
+import numpy as np #used for stacks 
+import cv2 #used for detecting the frames 
 
-
-class CustomFrameProcess(Wrapper):
+#here we are dealing with frames we need to process. we convert each frame into gray color frame and resize the frames
+class ProcessCustomFrames(Wrapper):
     def __init__(self, env, size=84, skip=4):
-        super(CustomFrameProcess, self).__init__(env)
+        super(ProcessCustomFrames, self).__init__(env)
         self.skip = skip
         self.size = size
         self.running = False
 
-    def ProcessFrame(self, frame):
-        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-        frame = cv2.resize(frame, (self.size, self.size)) / 255.0
-        frame = np.expand_dims(frame, axis=0)
-        return frame
+    def CustomFrame(self, f):
+        f = cv2.cvtColor(f, cv2.COLOR_RGB2GRAY)
+        f = cv2.resize(f, (self.size, self.size)) / 255.0
+        f = np.expand_dims(f, axis=0)
+        return f
 
     def step(self, action):
         total_reward = 0
@@ -27,31 +27,28 @@ class CustomFrameProcess(Wrapper):
 
             if done:
                 break
-        state = self.ProcessFrame(state)
+        state = self.CustomFrame(state)
         return state, total_reward, done, info
 
     def reset(self):
         state = self.env.reset()
-        state = self.ProcessFrame(state)
+        state = self.CustomFrame(state)
         return state
 
 
-def CreateEnv(world, stage, ACTION):
+def MarioAgentEnvironment(world, stage):
     env = gym_super_mario_bros.make(
-        'SuperMarioBros-{}-{}-v0'.format(world, stage))
-    if ACTION == 'SIMPLE':
-        env = JoypadSpace(env, SIMPLE_MOVEMENT)
-    if ACTION == 'COMPLEX':
-        env = JoypadSpace(env, COMPLEX_MOVEMENT)
-    env = CustomFrameProcess(env)
+        f'SuperMarioBros-{world}-{stage}-v0')
+    env = JoypadSpace(env, SIMPLE_MOVEMENT)
+    env = ProcessCustomFrames(env)
     return env
 
 
-class MultipleEnv:
-    def __init__(self, N, world, stage, ACTION):
+class CustomEnvironment:
+    def __init__(self, N, world, stage):
         self.world = world
         self.stage = stage
-        self.envs = [CreateEnv(self.world, self.stage, ACTION)
+        self.envs = [MarioAgentEnvironment(self.world, self.stage)
                      for _ in range(N)]
 
     def reset(self):
@@ -62,16 +59,16 @@ class MultipleEnv:
         return np.stack(obs)
 
     def step(self, actions):
-        obs, rewards, dones, infos = [], [], [], []
+        total_obs, total_rewards, total_done, total_infos = [], [], [], []
         for env, action in zip(self.envs, actions):
             ob, reward, done, info = env.step(action)
             if done:
                 ob = env.reset()
-            obs.append(ob)
-            rewards.append(reward)
-            dones.append(done)
-            infos.append(info)
-        return np.stack(obs), np.stack(rewards), np.stack(dones)
+            total_obs.append(ob)
+            total_rewards.append(reward)
+            total_done.append(done)
+            total_infos.append(info)
+        return np.stack(total_obs), np.stack(total_rewards), np.stack(total_done)
 
     def render(self):
         for env in self.envs:

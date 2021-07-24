@@ -1,7 +1,7 @@
 import mtcnn
-from tensorflow.keras.models import load_model
+#from tensorflow.keras.models import load_model
 import dlib
-
+import torch
 import os
 from utils import *
 from vision import Vision
@@ -24,8 +24,8 @@ credentials = Credentials(database_names_path)
 
 
 face_detector = mtcnn.MTCNN()
-face_encoder = load_model(encoder_model)
-
+#face_encoder = load_model(encoder_model)
+face_encoder = torch.load(encoder_model)
 checker = CheckGlasses(shape_predictor_path)
 vision = Vision(credentials, database_path, database_images, cap, checker, frontal_face_detector, shape_predictor, face_encoder, face_detector, encodings_dict_path)
 

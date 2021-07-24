@@ -1,46 +1,39 @@
 import time
 import torch
-
-from library.Environment import CreateEnv
-from library.Model import ActorCriticNet
+import sys
+from library.environment import MarioAgentEnvironment
+from library.agent import ActorCriticNetworkAgent
 import os 
-world = 1
-stage = 1
+world = sys.argv[1] 
+stage = sys.argv[2] 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-model_path =  os.path.join(BASE_DIR, 'mario/Models/SuperMarioBros_PPO_LSTM_1-1.model') 
+model_path =  os.path.join(BASE_DIR, f'mario/models/SuperMarioBros_PPO_LSTM_{world}-{stage}.model') 
+#model_path = sys.argv[3]
 #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-device = torch.device('cpu')
+torch_device = torch.device('cpu')
 
 
-def convert_action_16(actions):  # used when networks outputs 16 action
-    action_list = [5, 5, 0, 0, 4, 2, 3, 1, 9, 7, 8, 6, 5, 5, 0, 0]
-    return action_list[actions]
-
-
-def Test():
-    env = CreateEnv(world, stage, 'COMPLEX')
-    # 7 : SIMPLE MOVEMENT, 10 : COMPLEX MOVEMENT
-    Net = ActorCriticNet(7).to(device)
-    Net.load_state_dict(torch.load(
+def main():
+    mario_env = MarioAgentEnvironment(world, stage)
+    state = mario_env.reset()
+    agent = ActorCriticNetworkAgent(7).to(torch_device)
+    agent.load_state_dict(torch.load(
         model_path, map_location=torch.device('cpu')))
 
-    score = 0
-    state = env.reset()
-    h = torch.zeros(1, 512).to(device)
-    c = torch.zeros(1, 512).to(device)
+    result = 0
+    h = torch.zeros(1, 512).to(torch_device)
+    c = torch.zeros(1, 512).to(torch_device)
     done = False
 
     while not done:
-        prob, _, (next_h, next_c) = Net(
-            torch.FloatTensor([state]).to(device), (h, c))
+        prob, _, (next_h, next_c) = agent(
+            torch.FloatTensor([state]).to(torch_device), (h, c))
         action = torch.argmax(prob).item()
-        # action = convert_action_16(action) # used when networks outputs 16 action
-
-        next_state, reward, done, info = env.step(action)
-        env.render()
-
-        score += reward
-
+        next_state, reward, done, info = mario_env.step(action)
+        mario_env.render()
+        print(info)
+        print(reward)
+        result += reward
         state = next_state
         h = next_h.detach()
         c = next_c.detach()
@@ -48,8 +41,8 @@ def Test():
 
     time.sleep(2)
 
-    print('score : {}'.format(score))
+    print('Final result is: {}'.format(result))
 
 
 if __name__ == "__main__":
-    Test()
+    main()
