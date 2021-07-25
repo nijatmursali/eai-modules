@@ -15,7 +15,7 @@ print(BASE_DIR)
 # functions to call the libraries
 
 def call_mario():
-    call(['python', os.path.join(BASE_DIR, 'full-eai/ra/mario/Test.py')])
+    call(['python', os.path.join(BASE_DIR, 'full-eai/ra/mario/test.py')])
 
 def call_mountain():
     call(['python', os.path.join(BASE_DIR, 'full-eai/ra/mountain-car/main.py')])

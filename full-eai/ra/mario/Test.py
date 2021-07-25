@@ -7,7 +7,7 @@ import os
 world = sys.argv[1] 
 stage = sys.argv[2] 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-model_path =  os.path.join(BASE_DIR, f'mario/models/SuperMarioBros_PPO_LSTM_{world}-{stage}.model') 
+model_path =  os.path.join(BASE_DIR, f'mario/models/SMB_{world}-{stage}.h5') 
 #model_path = sys.argv[3]
 #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 torch_device = torch.device('cpu')

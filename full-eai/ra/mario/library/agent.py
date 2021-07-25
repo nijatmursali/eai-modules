@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
+# we initialize the class by extending the torhc nn module and overwriting some of the functions of it 
 class ActorCriticNetworkAgent(nn.Module):
     def __init__(self, N_action):
         super(ActorCriticNetworkAgent, self).__init__()
